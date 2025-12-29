@@ -2,7 +2,6 @@
 from utils.general import CUDA, DEVICE
 from models.yolov5.yolo import Model
 import torch
-import cv2
 import numpy as np
 from models.yolov5.yolo import load_yolov5_ckpt
 from utils.yolov5_utils import fuse_conv_and_bn
@@ -14,6 +13,10 @@ from torchsummary import summary
 import torch.nn.functional as F
 import copy
 
+# Detection modes: 'mask' returns segmentation mask, 'bbox' returns detection bboxes
+DET_MODE_MASK = 'mask'
+DET_MODE_BBOX = 'bbox'
+# Backward compatibility constants
 TEXTDET_MASK = 0
 TEXTDET_DET = 1
 TEXTDET_INFERENCE = 2
@@ -242,18 +245,6 @@ class TextDetBase(nn.Module):
         mask, features = self.text_seg(*features, forward_mode=TEXTDET_INFERENCE)
         lines = self.text_det(*features, step_eval=False)
         return blks[0], mask, lines
-
-class TextDetBaseDNN:
-    def __init__(self, input_size, model_path):
-        self.input_size = input_size
-        self.model = cv2.dnn.readNetFromONNX(model_path)
-        self.uoln = self.model.getUnconnectedOutLayersNames()
-    
-    def __call__(self, im_in):
-        blob = cv2.dnn.blobFromImage(im_in, scalefactor=1 / 255.0, size=(self.input_size, self.input_size))
-        self.model.setInput(blob)
-        blks, mask, lines_map  = self.model.forward(self.uoln)
-        return blks, mask, lines_map
 
 if __name__ == '__main__':
     device = 'cuda'
