@@ -31,3 +31,29 @@ We would not (don't have the right) share training sets or fonts publicly, 2/3 o
 * [https://github.com/juvian/Manga-Text-Segmentation](https://github.com/juvian/Manga-Text-Segmentation)
 * [https://github.com/ultralytics/yolov5](https://github.com/ultralytics/yolov5)
 * [https://github.com/WenmuZhou/DBNet.pytorch](https://github.com/WenmuZhou/DBNet.pytorch)
+
+---
+
+## Recent Updates
+
+This fork includes the following changes to modernize the codebase:
+
+- **Updated deprecated numpy types**: Replaced deprecated funtions in numpy 2.0+ to compatible alternatives in `utils/io_utils.py`.
+
+- **Removed ONNX support**: Eliminated ONNX export/import functionality (`utils/export.py`, `TextDetBaseDNN` class) due to multiple issues with onnx simplifier. The detector now uses PyTorch only.
+
+- **GPU by default**: The detector now automatically uses GPU (`cuda`) when available. Set `device='cpu'` explicitly if needed.
+
+- **Simplified detection modes**: Added `mode` parameter with two options:
+  - `mask` (default): Returns segmentation masks for text areas
+  - `bbox`: Returns detection bounding boxes
+  - Use `TextDetector(..., mode='bbox')` or CLI arg `--mode bbox`
+
+- **Auto-download model**: If the model file is not found at `data/comictextdetector.pt`, it will be automatically downloaded from the official release.
+
+- **CLI interface**: Added argparse support for easy use from command line:
+  ```bash
+  python inference.py -i <input_dir_or_file> [-o <output_dir>] [--mode mask|bbox] [--device cuda|cpu] [--half]
+  ```
+
+**Note:** Training scripts were not modified. All training-related code remains unchanged.
